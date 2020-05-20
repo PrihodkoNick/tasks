@@ -5,6 +5,8 @@ const game = {
   started: false,
   mouseDown: false,
   auto: false,
+  playerScore: 0,
+  computerScore: 0,
 };
 
 const players = ["player", "computer"]; // игроки
@@ -23,7 +25,8 @@ document.querySelector(".player").addEventListener("mousedown", (e) => {
   e.preventDefault();
   if (e.which === 1) {
     if (game.started) {
-      console.log("нельзя рисовать корабли во время игры!");
+      logs.textContent += "Нельзя рисовать корабли во время игры!\n";
+      // console.log("нельзя рисовать корабли во время игры!");
       return;
     }
 
@@ -32,9 +35,12 @@ document.querySelector(".player").addEventListener("mousedown", (e) => {
     let coords = getCoords(e);
     // если пересекаем корабль или границы
     if (limits.has(coords)) {
-      console.log(
-        "Нельзя рисовать новый корабль поверх старого или рядом с ним!"
-      );
+      logs.textContent +=
+        "Нельзя рисовать новый корабль поверх старого или рядом с ним!\n";
+
+      // console.log(
+      //   "Нельзя рисовать новый корабль поверх старого или рядом с ним!"
+      // );
       game.mouseDown = false;
     }
   }
@@ -81,7 +87,8 @@ document.querySelector(".player").addEventListener("mouseup", (e) => {
         // 4
         if (item.length === 4 && ship.size === 4) {
           amount4 = 1;
-          console.log("Вы уже нарисовали 4-х палубный корабль!");
+          logs.textContent += "Вы уже нарисовали 4-х палубный корабль!\n";
+          // console.log("Вы уже нарисовали 4-х палубный корабль!");
         }
         // 3
         if (item.length === 3 && ship.size === 3) {
@@ -104,13 +111,16 @@ document.querySelector(".player").addEventListener("mouseup", (e) => {
       }
 
       if (amount3 >= 2) {
-        console.log("Вы уже нарисовали два 3-х палубных корабля!");
+        logs.textContent += "Вы уже нарисовали два 3-х палубных корабля!\n";
+        // console.log("Вы уже нарисовали два 3-х палубных корабля!");
       }
       if (amount2 >= 3) {
-        console.log("Вы уже нарисовали три 2-х палубных корабля!");
+        logs.textContent += "Вы уже нарисовали три 2-х палубных корабля!\n";
+        // console.log("Вы уже нарисовали три 2-х палубных корабля!");
       }
       if (amount1 >= 4) {
-        console.log("Вы уже нарисовали четыре однопалубных корабля!");
+        logs.textContent += "Вы уже нарисовали четыре однопалубных корабля!\n";
+        // console.log("Вы уже нарисовали четыре однопалубных корабля!");
       }
 
       // рисуем только если прошли все условия
@@ -120,9 +130,11 @@ document.querySelector(".player").addEventListener("mouseup", (e) => {
           addOuterLimits(ship); // добавляем ограничения
           ships.push(Array.from(ship)); // добавляем корабль
         } else {
-          console.log(
-            "нельзя рисовать корабль поверх другого корабля или его границ!"
-          );
+          logs.textContent +=
+            "нельзя рисовать корабль поверх другого корабля или его границ!\n";
+          // console.log(
+          //   "нельзя рисовать корабль поверх другого корабля или его границ!"
+          // );
         }
 
         render(); // отрисовываем игровое поле
@@ -376,19 +388,17 @@ document.querySelector(".btn-start").addEventListener("click", (e) => {
   if (confirm("Начать новую игру?")) {
     // перед началом игры проверяем есть ли нарисованные корабли
     if (!ships.length) {
-      logs.innerText = "Сперва нарисуйте свои корабли!";
+      logs.textContent += "Сперва нарисуйте свои корабли!\n";
+      return;
+    } else if (ships.length !== 10) {
+      logs.textContent += "Количество кораблей должно быть 10!\n";
       return;
     }
-    // !!!
-    //  else if (ships.length !== 10) {
-    //   logs.innerText = "Количество кораблей должно быть 10!";
-    //   return;
-    // }
 
     game.started = true;
 
     let firstMove = Math.round(Math.random());
-    logs.innerText = `Первым стреляет ${players[firstMove]}`;
+    logs.innerText += `Первым стреляет ${players[firstMove]}\n`;
 
     if (firstMove) {
       computerShot();
@@ -448,7 +458,8 @@ document.querySelector(".computer").addEventListener("click", (e) => {
   e.preventDefault();
   if (e.target.nodeName === "TD") {
     if (!game.started) {
-      console.log("начните игру!");
+      logs.textContent += "Начните игру! Нажмите кнопку 'Понеслась!'\n";
+      // console.log("начните игру!");
       return;
     }
 
@@ -459,7 +470,8 @@ document.querySelector(".computer").addEventListener("click", (e) => {
 
     let exists = playerShots.find((shot) => shot === coords);
     if (exists) {
-      console.log("э-э-э-э-э-э! ты уже стрелял сюда! попробуй еще!");
+      logs.textContent += "э-э-э-э-э-э! ты уже стрелял сюда! попробуй еще!\n";
+      // console.log("э-э-э-э-э-э! ты уже стрелял сюда! попробуй еще!");
       return;
     }
 
@@ -509,7 +521,20 @@ function setShots(ship, who = 0) {
   // если неподбитых палуб не осталось, значит корабль потоплен
   if (!decks) {
     addOuterShots(ship, who);
-    console.log(`потопили ${ship.length}-палубный корабль!`);
+    who ? game.computerScore++ : game.playerScore++;
+    logs.textContent += `Потоплен ${ship.length}-палубный корабль!\n`;
+    // console.log(`Потоплен ${ship.length}-палубный корабль!\n`);
+  }
+
+  if (game.computerScore === 10 || game.playerScore === 10) {
+    document.querySelector(".popup").classList.add("popup--show");
+    if (game.computerScore === 10) {
+      document.querySelector(".popup__image").src = "lose.gif";
+      document.querySelector(".popup__text").innerText = "Лузер!";
+      logs.textContent += `Искусственный интеллект оказался сильнее!\n`;
+      return;
+    }
+    logs.textContent += `Победа за нами!!!\n`;
   }
 }
 
@@ -524,7 +549,9 @@ document.querySelector(".btn-player-auto").addEventListener("click", (e) => {
   }
 
   if (game.auto) {
-    console.log("уже расставили корабли автоматически");
+    logs.textContent +=
+      "Вы уже расставили корабли автоматически! Зачем делать это еще раз?\n";
+    // console.log("уже расставили корабли автоматически");
     return;
   }
 
