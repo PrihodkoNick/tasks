@@ -1,0 +1,115 @@
+body {
+  font-family: "PT Sans Narrow Bold", Courier, sans-serif;
+}
+
+.game {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: 960px;
+  margin: 0 auto;
+  padding: 0 20px 20px;
+
+  text-align: center;
+
+  border: 1px dashed black;
+}
+
+h1 {
+  width: 100%;
+}
+
+button {
+  height: 50px;
+  width: 150px;
+  margin-bottom: 10px;
+}
+
+.battlefield {
+  margin-bottom: 20px;
+
+  background-color: #f8f5f2;
+  border: 2px solid darkblue;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.battlefield th,
+.battlefield td {
+  width: 30px;
+  height: 30px;
+
+  border: 1px solid #4a4a4a;
+}
+
+.battlefield td {
+  position: relative;
+
+  background-color: lightblue;
+  cursor: pointer;
+}
+
+.battlefield td:hover {
+  background-color: lightcoral;
+}
+
+.battlefield .limit {
+  opacity: 0.5;
+  background-color: #4495cc;
+}
+
+.battlefield .ship {
+  background-color: lightsalmon;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+}
+
+.wounded:before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+
+  width: 35px;
+  height: 4px;
+
+  background-color: red;
+
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.wounded:after {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+
+  width: 35px;
+  height: 4px;
+
+  background-color: red;
+
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.battlefield .miss:before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+
+  width: 7px;
+  height: 7px;
+
+  background-color: black;
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+}
+
+.logs {
+  width: 100%;
+}
