@@ -153,8 +153,14 @@
         <td></td>
       </table>
       <div class="controls">
-        <button class="btn-start">Start</button>
-        <button class="btn-player-auto">Auto</button>
+        <button class="btn-start" title="Начать новую игру">Понеслась!</button>
+        <button
+          class="btn-player-auto"
+          title="Автоматическая расстановка кораблей"
+        >
+          Авто
+        </button>
+        <p>F5 - новая игра</p>
       </div>
       <table class="computer battlefield">
         <tr>
@@ -303,9 +309,17 @@
       <textarea class="logs" name="" id="" cols="10" rows="20"></textarea>
     </div>
 
-    <!-- <script src="index.js"></script> -->
-    <!-- <script src="test.js"></script> -->
-    <!-- <script src="auto.js"></script> -->
+    <div class="popup">
+      <button class="popup__close"></button>
+      <img
+        class="popup__image"
+        src="win.gif"
+        alt="Анимированное изображение победы"
+      />
+      <p class="popup__text">Этот сладкий вкус победы!</p>
+    </div>
+
     <script src="seabattle.js"></script>
+    <script src="popup.js"></script>
   </body>
 </html>

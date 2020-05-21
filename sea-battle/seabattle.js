@@ -15,8 +15,10 @@ const enemies = []; // корабли противника
 const limits = new Set(); // ограничения (границы)
 const limitsEnemies = new Set(); // ограничения (границы) для кораблей компьютера
 
-const computerShots = []; // выстрелы компьютера
-const playerShots = []; // выстрелы игрока
+// const computerShots = []; // выстрелы компьютера
+const computerShots = new Set(); // выстрелы компьютера
+// const playerShots = []; // выстрелы игрока
+const playerShots = new Set(); // выстрелы игрока
 
 const ship = new Set(); // временное хранилище для отрисовки корабля
 
@@ -26,7 +28,6 @@ document.querySelector(".player").addEventListener("mousedown", (e) => {
   if (e.which === 1) {
     if (game.started) {
       logs.textContent += "Нельзя рисовать корабли во время игры!\n";
-      // console.log("нельзя рисовать корабли во время игры!");
       return;
     }
 
@@ -38,9 +39,6 @@ document.querySelector(".player").addEventListener("mousedown", (e) => {
       logs.textContent +=
         "Нельзя рисовать новый корабль поверх старого или рядом с ним!\n";
 
-      // console.log(
-      //   "Нельзя рисовать новый корабль поверх старого или рядом с ним!"
-      // );
       game.mouseDown = false;
     }
   }
@@ -74,7 +72,7 @@ document.querySelector(".player").addEventListener("mouseup", (e) => {
     game.mouseDown = false;
 
     if (ship.size > 4) {
-      console.log("Нельзя рисовать корабль более 4-х палуб!");
+      logs.textContent += "Нельзя рисовать корабль более 4-х палуб!\n";
       ship.clear();
     } else {
       let amount4 = 0;
@@ -88,7 +86,6 @@ document.querySelector(".player").addEventListener("mouseup", (e) => {
         if (item.length === 4 && ship.size === 4) {
           amount4 = 1;
           logs.textContent += "Вы уже нарисовали 4-х палубный корабль!\n";
-          // console.log("Вы уже нарисовали 4-х палубный корабль!");
         }
         // 3
         if (item.length === 3 && ship.size === 3) {
@@ -112,29 +109,23 @@ document.querySelector(".player").addEventListener("mouseup", (e) => {
 
       if (amount3 >= 2) {
         logs.textContent += "Вы уже нарисовали два 3-х палубных корабля!\n";
-        // console.log("Вы уже нарисовали два 3-х палубных корабля!");
       }
       if (amount2 >= 3) {
         logs.textContent += "Вы уже нарисовали три 2-х палубных корабля!\n";
-        // console.log("Вы уже нарисовали три 2-х палубных корабля!");
       }
       if (amount1 >= 4) {
         logs.textContent += "Вы уже нарисовали четыре однопалубных корабля!\n";
-        // console.log("Вы уже нарисовали четыре однопалубных корабля!");
       }
 
       // рисуем только если прошли все условия
       if (!amount4 && amount3 < 2 && amount2 < 3 && amount1 < 4) {
         let check = checkLimits(ship); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
         if (!check) {
-          addOuterLimits(ship); // добавляем ограничения
+          addOuter(ship, limits); // добавляем ограничения
           ships.push(Array.from(ship)); // добавляем корабль
         } else {
           logs.textContent +=
-            "нельзя рисовать корабль поверх другого корабля или его границ!\n";
-          // console.log(
-          //   "нельзя рисовать корабль поверх другого корабля или его границ!"
-          // );
+            "Нельзя рисовать корабль поверх другого корабля или его границ!\n";
         }
 
         render(); // отрисовываем игровое поле
@@ -177,108 +168,49 @@ function getXY(coords) {
 }
 
 // добавление границ
-function addOuterLimits(set, who = 0) {
-  if (who) {
-    for (let item of set.values()) {
-      let { x, y } = getXY(item);
+function addOuter(ship, set) {
+  for (let deck of ship.values()) {
+    let { x, y } = getXY(deck);
 
-      x === 0 || y === 0 ? "" : limitsEnemies.add(`${x}:${y}`);
-      x - 1 === 0 || y === 0 ? "" : limitsEnemies.add(`${x - 1}:${y}`);
-      x + 1 === 0 || x + 1 > 10 || y === 0
-        ? ""
-        : limitsEnemies.add(`${x + 1}:${y}`);
-      x === 0 || y - 1 === 0 ? "" : limitsEnemies.add(`${x}:${y - 1}`);
-      x === 0 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : limitsEnemies.add(`${x}:${y + 1}`);
+    x === 0 || y === 0 ? "" : set.add(`${x}:${y}`);
+    x - 1 === 0 || y === 0 ? "" : set.add(`${x - 1}:${y}`);
+    x + 1 === 0 || x + 1 > 10 || y === 0 ? "" : set.add(`${x + 1}:${y}`);
+    x === 0 || y - 1 === 0 ? "" : set.add(`${x}:${y - 1}`);
+    x === 0 || y + 1 === 0 || y + 1 > 10 ? "" : set.add(`${x}:${y + 1}`);
 
-      x - 1 === 0 || y - 1 === 0 ? "" : limitsEnemies.add(`${x - 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y - 1 === 0
-        ? ""
-        : limitsEnemies.add(`${x + 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : limitsEnemies.add(`${x + 1}:${y + 1}`);
-      x - 1 === 0 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : limitsEnemies.add(`${x - 1}:${y + 1}`);
-    }
-  } else {
-    for (let item of set.values()) {
-      let { x, y } = getXY(item);
-
-      x === 0 || y === 0 ? "" : limits.add(`${x}:${y}`);
-      x - 1 === 0 || y === 0 ? "" : limits.add(`${x - 1}:${y}`);
-      x + 1 === 0 || x + 1 > 10 || y === 0 ? "" : limits.add(`${x + 1}:${y}`);
-      x === 0 || y - 1 === 0 ? "" : limits.add(`${x}:${y - 1}`);
-      x === 0 || y + 1 === 0 || y + 1 > 10 ? "" : limits.add(`${x}:${y + 1}`);
-
-      x - 1 === 0 || y - 1 === 0 ? "" : limits.add(`${x - 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y - 1 === 0
-        ? ""
-        : limits.add(`${x + 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : limits.add(`${x + 1}:${y + 1}`);
-      x - 1 === 0 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : limits.add(`${x - 1}:${y + 1}`);
-    }
+    x - 1 === 0 || y - 1 === 0 ? "" : set.add(`${x - 1}:${y - 1}`);
+    x + 1 === 0 || x + 1 > 10 || y - 1 === 0
+      ? ""
+      : set.add(`${x + 1}:${y - 1}`);
+    x + 1 === 0 || x + 1 > 10 || y + 1 === 0 || y + 1 > 10
+      ? ""
+      : set.add(`${x + 1}:${y + 1}`);
+    x - 1 === 0 || y + 1 === 0 || y + 1 > 10
+      ? ""
+      : set.add(`${x - 1}:${y + 1}`);
   }
 }
 
-// автоматичсекая отрисовка выстрелов вокруг потопленного корабля (who: 0-игрок, 1-компьютер)
-function addOuterShots(arr, who = 0) {
-  if (who) {
-    for (let item of arr) {
-      let { x, y } = getXY(item);
+// автоматическая отрисовка выстрелов вокруг потопленного корабля
+function addOuterShots(ship, shots) {
+  for (let item of ship) {
+    let { x, y } = getXY(item);
+    x === 0 || y === 0 ? "" : shots.add(`${x}:${y}`);
+    x - 1 === 0 || y === 0 ? "" : shots.add(`${x - 1}:${y}`);
+    x + 1 === 0 || x + 1 > 10 || y === 0 ? "" : shots.add(`${x + 1}:${y}`);
+    x === 0 || y - 1 === 0 ? "" : shots.add(`${x}:${y - 1}`);
+    x === 0 || y + 1 === 0 || y + 1 > 10 ? "" : shots.add(`${x}:${y + 1}`);
 
-      x === 0 || y === 0 ? "" : computerShots.push(`${x}:${y}`);
-      x - 1 === 0 || y === 0 ? "" : computerShots.push(`${x - 1}:${y}`);
-      x + 1 === 0 || x + 1 > 10 || y === 0
-        ? ""
-        : computerShots.push(`${x + 1}:${y}`);
-      x === 0 || y - 1 === 0 ? "" : computerShots.push(`${x}:${y - 1}`);
-      x === 0 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : computerShots.push(`${x}:${y + 1}`);
-
-      x - 1 === 0 || y - 1 === 0 ? "" : computerShots.push(`${x - 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y - 1 === 0
-        ? ""
-        : computerShots.push(`${x + 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : computerShots.push(`${x + 1}:${y + 1}`);
-      x - 1 === 0 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : computerShots.push(`${x - 1}:${y + 1}`);
-    }
-  } else {
-    for (let item of arr) {
-      let { x, y } = getXY(item);
-
-      x === 0 || y === 0 ? "" : playerShots.push(`${x}:${y}`);
-      x - 1 === 0 || y === 0 ? "" : playerShots.push(`${x - 1}:${y}`);
-      x + 1 === 0 || x + 1 > 10 || y === 0
-        ? ""
-        : playerShots.push(`${x + 1}:${y}`);
-      x === 0 || y - 1 === 0 ? "" : playerShots.push(`${x}:${y - 1}`);
-      x === 0 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : playerShots.push(`${x}:${y + 1}`);
-
-      x - 1 === 0 || y - 1 === 0 ? "" : playerShots.push(`${x - 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y - 1 === 0
-        ? ""
-        : playerShots.push(`${x + 1}:${y - 1}`);
-      x + 1 === 0 || x + 1 > 10 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : playerShots.push(`${x + 1}:${y + 1}`);
-      x - 1 === 0 || y + 1 === 0 || y + 1 > 10
-        ? ""
-        : playerShots.push(`${x - 1}:${y + 1}`);
-    }
+    x - 1 === 0 || y - 1 === 0 ? "" : shots.add(`${x - 1}:${y - 1}`);
+    x + 1 === 0 || x + 1 > 10 || y - 1 === 0
+      ? ""
+      : shots.add(`${x + 1}:${y - 1}`);
+    x + 1 === 0 || x + 1 > 10 || y + 1 === 0 || y + 1 > 10
+      ? ""
+      : shots.add(`${x + 1}:${y + 1}`);
+    x - 1 === 0 || y + 1 === 0 || y + 1 > 10
+      ? ""
+      : shots.add(`${x - 1}:${y + 1}`);
   }
 }
 
@@ -398,7 +330,7 @@ document.querySelector(".btn-start").addEventListener("click", (e) => {
     game.started = true;
 
     let firstMove = Math.round(Math.random());
-    logs.innerText += `Первым стреляет ${players[firstMove]}\n`;
+    logs.innerText += `Первым стреляет ${players[firstMove]} \n`;
 
     if (firstMove) {
       computerShot();
@@ -445,11 +377,17 @@ function computerShot() {
 function setNewShot() {
   let { x, y } = getRandomCoordinates();
 
-  if (computerShots.find((item) => item === `${x}:${y}`)) {
+  if (computerShots.has(`${x}:${y}`)) {
     return setNewShot(); // компьютер стреляет еще раз если уже был такой выстрел
   } else {
-    computerShots.push(`${x}:${y}`);
+    computerShots.add(`${x}:${y}`);
   }
+
+  // if (computerShots.find((item) => item === `${x}:${y}`)) {
+  //   return setNewShot(); // компьютер стреляет еще раз если уже был такой выстрел
+  // } else {
+  //   computerShots.push(`${x}:${y}`);
+  // }
   return { x, y };
 }
 
@@ -459,7 +397,6 @@ document.querySelector(".computer").addEventListener("click", (e) => {
   if (e.target.nodeName === "TD") {
     if (!game.started) {
       logs.textContent += "Начните игру! Нажмите кнопку 'Понеслась!'\n";
-      // console.log("начните игру!");
       return;
     }
 
@@ -468,14 +405,15 @@ document.querySelector(".computer").addEventListener("click", (e) => {
     let x = +coords.slice(0, coords.indexOf(":"));
     let y = +coords.slice(coords.indexOf(":") + 1);
 
-    let exists = playerShots.find((shot) => shot === coords);
+    // let exists = playerShots.find((shot) => shot === coords);
+    let exists = playerShots.has(coords);
     if (exists) {
-      logs.textContent += "э-э-э-э-э-э! ты уже стрелял сюда! попробуй еще!\n";
-      // console.log("э-э-э-э-э-э! ты уже стрелял сюда! попробуй еще!");
+      logs.textContent += "Э-э-э-э-э-э! ты уже стрелял сюда! попробуй еще!\n";
       return;
     }
 
-    playerShots.push(coords);
+    // playerShots.push(coords);
+    playerShots.add(coords);
 
     //  идем по массиву кораблей -> "заходим" в каждый корабль и проверяем попали или нет
     for (let item of enemies) {
@@ -520,7 +458,7 @@ function setShots(ship, who = 0) {
 
   // если неподбитых палуб не осталось, значит корабль потоплен
   if (!decks) {
-    addOuterShots(ship, who);
+    who ? addOuterShots(ship, computerShots) : addOuterShots(ship, playerShots);
     who ? game.computerScore++ : game.playerScore++;
     logs.textContent += `Потоплен ${ship.length}-палубный корабль!\n`;
     // console.log(`Потоплен ${ship.length}-палубный корабль!\n`);
@@ -626,10 +564,10 @@ function setShipAuto(len, who = 0) {
       : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
     if (!check) {
       if (who) {
-        addOuterLimits(drawShips, 1); // добавляем ограничения
+        addOuter(drawShips, limitsEnemies); // добавляем ограничения
         enemies.push(Array.from(drawShips)); // добавляем корабль
       } else {
-        addOuterLimits(drawShips); // добавляем ограничения
+        addOuter(drawShips, limits); // добавляем ограничения
         ships.push(Array.from(drawShips)); // добавляем корабль
       }
     } else {
@@ -692,10 +630,10 @@ function setShipAuto(len, who = 0) {
       : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
     if (!check) {
       if (who) {
-        addOuterLimits(drawShips, 1); // добавляем ограничения
+        addOuter(drawShips, limitsEnemies); // добавляем ограничения
         enemies.push(Array.from(drawShips)); // добавляем корабль
       } else {
-        addOuterLimits(drawShips); // добавляем ограничения
+        addOuter(drawShips, limits); // добавляем ограничения
         ships.push(Array.from(drawShips)); // добавляем корабли
       }
     } else {
@@ -758,10 +696,10 @@ function setShipAuto(len, who = 0) {
       : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
     if (!check) {
       if (who) {
-        addOuterLimits(drawShips, 1); // добавляем ограничения
+        addOuter(drawShips, limitsEnemies); // добавляем ограничения
         enemies.push(Array.from(drawShips)); // добавляем корабль
       } else {
-        addOuterLimits(drawShips); // добавляем ограничения
+        addOuter(drawShips, limits); // добавляем ограничения
         ships.push(Array.from(drawShips)); // добавляем корабли
       }
     } else {
@@ -792,10 +730,10 @@ function setShipAuto(len, who = 0) {
       : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
     if (!check) {
       if (who) {
-        addOuterLimits(drawShips, 1); // добавляем ограничения
+        addOuter(drawShips, limitsEnemies); // добавляем ограничения
         enemies.push(Array.from(drawShips)); // добавляем корабль
       } else {
-        addOuterLimits(drawShips); // добавляем ограничения
+        addOuter(drawShips, limits); // добавляем ограничения
         ships.push(Array.from(drawShips)); // добавляем корабли
       }
     } else {
