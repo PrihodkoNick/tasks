@@ -1,4 +1,4 @@
-// don't forget !!! and ???
+// don't forget ???
 
 const logs = document.querySelector(".logs"); // поле логов
 const game = {
@@ -6,7 +6,7 @@ const game = {
   mouseDown: false,
   auto: false,
   playerScore: 0,
-  computerScore: 0,
+  enemyScore: 0,
 };
 
 const players = ["player", "computer"]; // игроки
@@ -15,9 +15,7 @@ const enemies = []; // корабли противника
 const limits = new Set(); // ограничения (границы)
 const limitsEnemies = new Set(); // ограничения (границы) для кораблей компьютера
 
-// const computerShots = []; // выстрелы компьютера
-const computerShots = new Set(); // выстрелы компьютера
-// const playerShots = []; // выстрелы игрока
+const enemyShots = new Set(); // выстрелы компьютера
 const playerShots = new Set(); // выстрелы игрока
 
 const ship = new Set(); // временное хранилище для отрисовки корабля
@@ -193,8 +191,9 @@ function addOuter(ship, set) {
 
 // автоматическая отрисовка выстрелов вокруг потопленного корабля
 function addOuterShots(ship, shots) {
-  for (let item of ship) {
-    let { x, y } = getXY(item);
+  for (let deck of ship) {
+    let { x, y } = getXY(deck);
+
     x === 0 || y === 0 ? "" : shots.add(`${x}:${y}`);
     x - 1 === 0 || y === 0 ? "" : shots.add(`${x - 1}:${y}`);
     x + 1 === 0 || x + 1 > 10 || y === 0 ? "" : shots.add(`${x + 1}:${y}`);
@@ -233,7 +232,7 @@ function render() {
   });
 
   // промахи
-  computerShots.forEach((attempt) => {
+  enemyShots.forEach((attempt) => {
     let { x, y } = getXY(attempt);
     let cell = document.querySelector(
       `.player tr:nth-child(${y + 1}) td:nth-child(${x + 1})`
@@ -255,8 +254,8 @@ function render() {
       if (!cell.classList.contains("ship")) {
         cell.classList.add("limit");
       }
-    } catch {
-      console.log("Скорее всего вылезли за границы игрового поля");
+    } catch (err) {
+      console.log(err);
     }
   });
 }
@@ -296,7 +295,7 @@ function renderComputer() {
     }
   }
 
-  // ограничения границы
+  // ограничения (границы)
   limitsEnemies.forEach((limit) => {
     let { x, y } = getXY(limit);
     let cell = document.querySelector(
@@ -307,8 +306,8 @@ function renderComputer() {
       if (!cell.classList.contains("ship")) {
         cell.classList.add("limit", "hide");
       }
-    } catch {
-      console.log("Скорее всего вылезли за границы игрового поля");
+    } catch (err) {
+      console.log(err);
     }
   });
 }
@@ -317,7 +316,12 @@ function renderComputer() {
 document.querySelector(".btn-start").addEventListener("click", (e) => {
   e.preventDefault(); // ???
 
-  if (confirm("Начать новую игру?")) {
+  if (game.started) {
+    logs.textContent += "Бой в самом разгаре!";
+    return;
+  }
+
+  if (confirm("Готовы вступить в бой?")) {
     // перед началом игры проверяем есть ли нарисованные корабли
     if (!ships.length) {
       logs.textContent += "Сперва нарисуйте свои корабли!\n";
@@ -330,7 +334,7 @@ document.querySelector(".btn-start").addEventListener("click", (e) => {
     game.started = true;
 
     let firstMove = Math.round(Math.random());
-    logs.innerText += `Первым стреляет ${players[firstMove]} \n`;
+    logs.innerText += `Первым стреляет ${players[firstMove]}!\\n`;
 
     if (firstMove) {
       computerShot();
@@ -377,17 +381,12 @@ function computerShot() {
 function setNewShot() {
   let { x, y } = getRandomCoordinates();
 
-  if (computerShots.has(`${x}:${y}`)) {
+  if (enemyShots.has(`${x}:${y}`)) {
     return setNewShot(); // компьютер стреляет еще раз если уже был такой выстрел
   } else {
-    computerShots.add(`${x}:${y}`);
+    enemyShots.add(`${x}:${y}`);
   }
 
-  // if (computerShots.find((item) => item === `${x}:${y}`)) {
-  //   return setNewShot(); // компьютер стреляет еще раз если уже был такой выстрел
-  // } else {
-  //   computerShots.push(`${x}:${y}`);
-  // }
   return { x, y };
 }
 
@@ -405,20 +404,17 @@ document.querySelector(".computer").addEventListener("click", (e) => {
     let x = +coords.slice(0, coords.indexOf(":"));
     let y = +coords.slice(coords.indexOf(":") + 1);
 
-    // let exists = playerShots.find((shot) => shot === coords);
     let exists = playerShots.has(coords);
     if (exists) {
       logs.textContent += "Э-э-э-э-э-э! ты уже стрелял сюда! попробуй еще!\n";
       return;
     }
 
-    // playerShots.push(coords);
     playerShots.add(coords);
 
     //  идем по массиву кораблей -> "заходим" в каждый корабль и проверяем попали или нет
     for (let item of enemies) {
       for (let deck of item) {
-        // let { shipX, shipY } = getXY(deck); // ??? почему-то не срабатывает
         shipX = +deck.slice(0, deck.indexOf(":"));
         shipY = +deck.slice(deck.indexOf(":") + 1, deck.indexOf(","));
         res = x === shipX && y === shipY;
@@ -458,15 +454,14 @@ function setShots(ship, who = 0) {
 
   // если неподбитых палуб не осталось, значит корабль потоплен
   if (!decks) {
-    who ? addOuterShots(ship, computerShots) : addOuterShots(ship, playerShots);
-    who ? game.computerScore++ : game.playerScore++;
+    who ? addOuterShots(ship, enemyShots) : addOuterShots(ship, playerShots);
+    who ? game.enemyScore++ : game.playerScore++;
     logs.textContent += `Потоплен ${ship.length}-палубный корабль!\n`;
-    // console.log(`Потоплен ${ship.length}-палубный корабль!\n`);
   }
 
-  if (game.computerScore === 10 || game.playerScore === 10) {
+  if (game.enemyScore === 10 || game.playerScore === 10) {
     document.querySelector(".popup").classList.add("popup--show");
-    if (game.computerScore === 10) {
+    if (game.enemyScore === 10) {
       document.querySelector(".popup__image").src = "lose.gif";
       document.querySelector(".popup__text").innerText = "Лузер!";
       logs.textContent += `Искусственный интеллект оказался сильнее!\n`;
@@ -477,274 +472,103 @@ function setShots(ship, who = 0) {
 }
 
 // -- AUTO ---------------------------------------------------------------------
-// автоматическая отрисовка кораблей
-document.querySelector(".btn-player-auto").addEventListener("click", (e) => {
+// Нажали кнопку "Авто"
+document.querySelector(".btn-auto").addEventListener("click", (e) => {
   e.preventDefault();
 
   if (game.started) {
-    console.log("игра уже началась!");
+    logs.textContent += "Игра уже началась!\n";
     return;
   }
 
   if (game.auto) {
     logs.textContent +=
       "Вы уже расставили корабли автоматически! Зачем делать это еще раз?\n";
-    // console.log("уже расставили корабли автоматически");
     return;
   }
 
-  const shipsAmount = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+  if (ships.length) {
+    logs.textContent +=
+      "Наверное, Вы уже начали рисовать корабли вручную. Продолжайте в том же духе!\n";
+    return;
+  }
+
+  const qtShips = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
   // отрисовываем корабли игрока
-  for (let i = 0; i < shipsAmount.length; i++) {
-    setShipAuto(shipsAmount[i]);
+  for (let i = 0; i < qtShips.length; i++) {
+    setShipAuto(qtShips[i]);
   }
 
   //  отрисовываем корабли компьютера
-  for (let i = 0; i < shipsAmount.length; i++) {
-    setShipAuto(shipsAmount[i], 1);
+  for (let i = 0; i < qtShips.length; i++) {
+    setShipAuto(qtShips[i], 1);
   }
 
   game.auto = true;
 });
 
-function setShipAuto(len, who = 0) {
-  const drawShips = new Set();
-  let direction = 0;
-  let amount4 = 0;
-  let amount3 = 0;
-  let amount2 = 0;
-  let amount1 = 0;
+// автоматическая отрисовка корабля
+function setShipAuto(qtDecks, who = 0) {
+  const drawShip = new Set();
+  let direction = Math.round(Math.random()); // направление (0-горизонтально, 1-вертикально)
+  let boundary = qtDecks === 4 ? 8 : qtDecks === 3 ? 9 : qtDecks === 2 ? 10 : 0;
 
-  // 4
-  if (len === 4) {
-    while (amount4 === 0) {
-      let { x, y } = getRandomCoordinates(); // получили первую точку
-      direction = Math.round(Math.random()); // направление (0-горизонтально, 1-вертикально)
+  while (true) {
+    let { x, y } = getRandomCoordinates(); // получили первую точку
 
-      if (x >= 8) {
-        if (direction === 0) {
-          console.log("нельзя рисовать вправо 4-х палубный");
-          direction = 1;
-        }
-        if (direction === 1) {
-          if (y >= 8) {
-            console.log("нельзя рисовать вниз 4-х палубный");
-            continue;
-          } else {
-            for (let i = y; i < y + 4; i++) {
-              drawShips.add(`${x}:${i},false`);
-            }
-            amount4 = 1;
-          }
-        }
-      } else {
-        if (direction === 0) {
-          for (let i = x; i < x + 4; i++) {
-            drawShips.add(`${x}:${i},false`);
-          }
-          amount4 = 1;
-        }
-        if (direction === 1) {
-          if (y >= 8) {
-            console.log("нельзя рисовать вниз 4-х палубный");
-          } else {
-            for (let i = y; i < y + 4; i++) {
-              drawShips.add(`${x}:${i},false`);
-            }
-            amount4 = 1;
-          }
-        }
-      }
+    if (qtDecks === 1) {
+      drawShip.add(`${x}:${y},false`);
+      break;
     }
 
-    let check;
-    who
-      ? (check = checkLimits(drawShips, 1))
-      : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
-    if (!check) {
-      if (who) {
-        addOuter(drawShips, limitsEnemies); // добавляем ограничения
-        enemies.push(Array.from(drawShips)); // добавляем корабль
-      } else {
-        addOuter(drawShips, limits); // добавляем ограничения
-        ships.push(Array.from(drawShips)); // добавляем корабль
+    if (x >= boundary) {
+      !direction ? (direction = 1) : "";
+
+      if (direction) {
+        if (y >= boundary) {
+          continue;
+        } else {
+          for (let i = y; i < y + qtDecks; i++) {
+            drawShip.add(`${x}:${i},false`);
+          }
+          break;
+        }
       }
     } else {
-      console.log(
-        "нельзя рисовать корабль поверх другого корабля или его границ!"
-      );
+      if (!direction) {
+        for (let i = x; i < x + qtDecks; i++) {
+          drawShip.add(`${i}:${y},false`);
+        }
+        break;
+      }
+      if (direction) {
+        if (y >= boundary) {
+        } else {
+          for (let i = y; i < y + qtDecks; i++) {
+            drawShip.add(`${x}:${i},false`);
+          }
+          break;
+        }
+      }
     }
-
-    who ? renderComputer() : render(); // отрисовываем игровое поле
   }
 
-  drawShips.clear();
-
-  // 3
-  if (len === 3) {
-    while (amount3 === 0) {
-      let { x, y } = getRandomCoordinates(); // получили первую точку
-      direction = Math.round(Math.random()); // направление (0-горизонтально, 1-вертикально)
-
-      if (x >= 9) {
-        if (direction === 0) {
-          console.log("нельзя рисовать вправо 3-х палубный");
-          direction = 1;
-        }
-        if (direction === 1) {
-          if (y >= 9) {
-            console.log("нельзя рисовать вниз 3-х палубный");
-            continue;
-          } else {
-            for (let i = y; i < y + 3; i++) {
-              drawShips.add(`${x}:${i},false`);
-            }
-
-            amount3 = 1;
-          }
-        }
-      } else {
-        if (direction === 0) {
-          for (let i = x; i < x + 3; i++) {
-            drawShips.add(`${x}:${i},false`);
-          }
-          amount3 = 1;
-        }
-        if (direction === 1) {
-          if (y >= 9) {
-            console.log("нельзя рисовать вниз 3-х палубный");
-          } else {
-            for (let i = y; i < y + 3; i++) {
-              drawShips.add(`${x}:${i},false`);
-            }
-            amount3 = 1;
-          }
-        }
-      }
-    }
-
-    let check;
-    who
-      ? (check = checkLimits(drawShips, 1))
-      : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
-    if (!check) {
-      if (who) {
-        addOuter(drawShips, limitsEnemies); // добавляем ограничения
-        enemies.push(Array.from(drawShips)); // добавляем корабль
-      } else {
-        addOuter(drawShips, limits); // добавляем ограничения
-        ships.push(Array.from(drawShips)); // добавляем корабли
-      }
+  let check;
+  who ? (check = checkLimits(drawShip, 1)) : (check = checkLimits(drawShip)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
+  if (!check) {
+    if (who) {
+      addOuter(drawShip, limitsEnemies); // добавляем ограничения
+      enemies.push(Array.from(drawShip)); // добавляем корабль
     } else {
-      console.log(
-        "нельзя рисовать корабль поверх другого корабля или его границ!"
-      );
-      who ? setShipAuto(3, 1) : setShipAuto(3); // ??? возможна ли здесь ошибка... не нарисует он в очередной раз три 3-х палубника ???
+      addOuter(drawShip, limits); // добавляем ограничения
+      ships.push(Array.from(drawShip)); // добавляем корабль
     }
-
-    who ? renderComputer() : render(); // отрисовываем игровое поле
+  } else {
+    who ? setShipAuto(qtDecks, 1) : setShipAuto(qtDecks);
   }
 
-  drawShips.clear();
-
-  // 2
-  if (len === 2) {
-    while (amount2 === 0) {
-      let { x, y } = getRandomCoordinates(); // получили первую точку
-      direction = Math.round(Math.random()); // направление (0-горизонтально, 1-вертикально)
-
-      if (x >= 10) {
-        if (direction === 0) {
-          console.log("нельзя рисовать вправо 2-х палубный");
-          direction = 1;
-        }
-        if (direction === 1) {
-          if (y >= 10) {
-            console.log("нельзя рисовать вниз 2-х палубный");
-            continue;
-          } else {
-            for (let i = y; i < y + 2; i++) {
-              drawShips.add(`${x}:${i},false`);
-            }
-            amount2 = 1;
-          }
-        }
-      } else {
-        if (direction === 0) {
-          for (let i = x; i < x + 2; i++) {
-            drawShips.add(`${x}:${i},false`);
-          }
-          amount2 = 1;
-        }
-        if (direction === 1) {
-          if (y >= 10) {
-            console.log("нельзя рисовать вниз 2-х палубный");
-          } else {
-            for (let i = y; i < y + 2; i++) {
-              drawShips.add(`${x}:${i},false`);
-            }
-            amount2 = 1;
-          }
-        }
-      }
-    }
-
-    let check;
-    who
-      ? (check = checkLimits(drawShips, 1))
-      : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
-    if (!check) {
-      if (who) {
-        addOuter(drawShips, limitsEnemies); // добавляем ограничения
-        enemies.push(Array.from(drawShips)); // добавляем корабль
-      } else {
-        addOuter(drawShips, limits); // добавляем ограничения
-        ships.push(Array.from(drawShips)); // добавляем корабли
-      }
-    } else {
-      console.log(
-        "нельзя рисовать корабль поверх другого корабля или его границ!"
-      );
-      who ? setShipAuto(2, 1) : setShipAuto(2); // ??? возможна ли здесь ошибка... не нарисует он в очередной раз три 3-х палубника ???
-    }
-
-    who ? renderComputer() : render(); // отрисовываем игровое поле
-  }
-
-  drawShips.clear();
-
-  // 1
-  if (len === 1) {
-    while (amount1 === 0) {
-      let { x, y } = getRandomCoordinates(); // получили первую точку
-      direction = Math.round(Math.random()); // направление (0-горизонтально, 1-вертикально)
-
-      drawShips.add(`${x}:${y},false`);
-      amount1 = 1;
-    }
-
-    let check;
-    who
-      ? (check = checkLimits(drawShips, 1))
-      : (check = checkLimits(drawShips)); // проверяем нет ли пересечений (true - есть пересечение, false - нет)
-    if (!check) {
-      if (who) {
-        addOuter(drawShips, limitsEnemies); // добавляем ограничения
-        enemies.push(Array.from(drawShips)); // добавляем корабль
-      } else {
-        addOuter(drawShips, limits); // добавляем ограничения
-        ships.push(Array.from(drawShips)); // добавляем корабли
-      }
-    } else {
-      console.log(
-        "нельзя рисовать корабль поверх другого корабля или его границ!"
-      );
-      who ? setShipAuto(1, 1) : setShipAuto(1); // ??? возможна ли здесь ошибка... не нарисует он в очередной раз три 3-х палубника ???
-    }
-
-    who ? renderComputer() : render(); // отрисовываем игровое поле
-  }
+  who ? renderComputer() : render(); // отрисовываем игровое поле
 }
 
 // получение случайных координат
