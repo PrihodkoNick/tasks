@@ -20,13 +20,6 @@
     0 17px 2px -6px rgba(0, 0, 0, 0.2);
 }
 
-.footer > button {
-  padding: 3px 7px;
-
-  font: inherit;
-  opacity: 0.7;
-}
-
 .footer > button:hover {
   text-decoration: underline;
 }

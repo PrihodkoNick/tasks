@@ -1,0 +1,37 @@
+.toggle-all {
+  position: absolute;
+  top: 20px;
+  left: 25px;
+}
+
+.toggle-all label {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+
+/* input invisible */
+.check-all {
+  width: 1px;
+
+  opacity: 0;
+}
+
+.toggle-all label::before {
+  position: absolute;
+  content: "❯";
+  transform: rotate(90deg);
+
+  font-size: 22px;
+  color: #e6e6e6;
+
+  cursor: pointer;
+}
+
+.check-all:checked + label::before {
+  color: #737373;
+}

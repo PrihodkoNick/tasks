@@ -21,6 +21,7 @@ export default class Add extends Component {
         placeholder={"What needs to be done?"}
         onKeyUp={(e) => addTodo(e)}
         onChange={this.handleChange}
+        maxLength="50"
       />
     );
   }

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "./App.css";
 
 import Header from "./components/header";
+import Toggle from "./components/toggle";
 import Add from "./components/add";
 import List from "./components/list";
 import Footer from "./components/footer";
@@ -73,12 +74,24 @@ export default class App extends Component {
     this.setState({ filter });
   };
 
-  render() {
-    const countDone = this.state.todos.filter((item) => item.done === true)
-      .length;
-    const countLeft = this.state.todos.length - countDone;
+  clearCompleted = () => {
+    this.setState(({ todos }) => {
+      let newTodos = [...todos];
+      newTodos = newTodos.filter((item) => item.done === false);
 
-    let newTodos = [...this.state.todos];
+      return { todos: newTodos };
+    });
+  };
+
+  render() {
+    const { todos, filter } = this.state;
+
+    const hasData = todos.length || false;
+
+    const countDone = todos.filter((item) => item.done === true).length;
+    const countLeft = todos.length - countDone;
+
+    let newTodos = [...todos];
 
     if (this.state.filter === "All") {
     } else if (this.state.filter === "Active") {
@@ -90,19 +103,22 @@ export default class App extends Component {
     return (
       <section className="todoapp">
         <Header />
+        <Toggle />
         <Add addTodo={this.addTodo} />
         <List
-          // todos= {this.state.todos}
           todos={newTodos}
           onDelete={this.deleteTodo}
           onChange={this.checkTodo}
         />
-        <Footer
-          left={countLeft}
-          done={countDone}
-          onFilterChange={this.filterChange}
-          activeFilter={this.state.filter}
-        />
+        {hasData && (
+          <Footer
+            left={countLeft}
+            done={countDone}
+            onFilterChange={this.filterChange}
+            activeFilter={filter}
+            clearCompleted={this.clearCompleted}
+          />
+        )}
       </section>
     );
   }

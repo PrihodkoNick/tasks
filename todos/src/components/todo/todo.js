@@ -10,7 +10,9 @@ function Todo({ id, label, done, onDelete, onChange }) {
           type="checkbox"
           onChange={onChange}
           checked={done}
+          id={`todo-toggle${id}`}
         />
+        <label className="toggle-label" for={`todo-toggle${id}`}></label>
         <label className={done ? "done" : ""}>{label}</label>
         <button className="delete" onClick={onDelete}></button>
       </div>
