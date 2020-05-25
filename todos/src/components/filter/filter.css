@@ -1,0 +1,26 @@
+.filters {
+  display: flex;
+  align-items: center;
+  height: 25px;
+}
+
+.filters li {
+  margin-right: 2px;
+}
+
+.filters li:last-child {
+  margin-right: 0;
+}
+
+.filters li button {
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+
+.filters li .selected {
+  border-color: rgba(175, 47, 47, 0.2);
+}
+
+.filters li button:hover {
+  border-color: rgba(175, 47, 47, 0.1);
+}
