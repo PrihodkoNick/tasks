@@ -10,16 +10,23 @@ export default class Add extends Component {
     this.setState({ value: e.target.value });
   };
 
-  render() {
-    const { addTodo } = this.props;
+  handleKeyUp = (e) => {
+    e.preventDefault();
 
+    if (e.keyCode === 13) {
+      this.props.addTodo(this.state.value);
+      this.setState({ value: "" });
+    }
+  };
+
+  render() {
     return (
       <input
         value={this.state.value}
         type="text"
         className="new-todo"
         placeholder={"What needs to be done?"}
-        onKeyUp={(e) => addTodo(e)}
+        onKeyUp={this.handleKeyUp}
         onChange={this.handleChange}
         maxLength="50"
       />

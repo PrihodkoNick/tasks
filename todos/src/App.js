@@ -17,26 +17,26 @@ export default class App extends Component {
       this.createNewTodo("Have a lunch"),
     ],
     filter: "All",
+    isAllDone: false,
   };
 
+  // pattern for create new todo
   createNewTodo(label) {
     return { label, done: false, id: (this.todoId += 1) };
   }
 
-  addTodo = (e) => {
-    e.preventDefault();
+  // add new todo
+  addTodo = (text) => {
+    const newTodo = this.createNewTodo(text);
 
-    if (e.keyCode === 13) {
-      const newTodo = this.createNewTodo(e.target.value);
+    this.setState(({ todos }) => {
+      const newTodos = [...todos, newTodo];
 
-      this.setState(({ todos }) => {
-        const newTodos = [...todos, newTodo];
-
-        return { todos: newTodos };
-      });
-    }
+      return { todos: newTodos };
+    });
   };
 
+  // delete current todo
   deleteTodo = (e) => {
     e.preventDefault();
 
@@ -53,10 +53,8 @@ export default class App extends Component {
     });
   };
 
-  checkTodo = (e) => {
-    const todoId = +e.target.closest("li").dataset.id;
-    const checked = e.target.checked;
-
+  // check/uncheck current todo
+  checkTodo = (todoId, checked) => {
     this.setState(({ todos }) => {
       const newTodos = [...todos];
 
@@ -83,6 +81,54 @@ export default class App extends Component {
     });
   };
 
+  checkAll = (e) => {
+    const checked = e.target.previousElementSibling.checked;
+
+    this.setState(({ todos }) => {
+      let newTodos = [...todos];
+
+      for (let item of newTodos) {
+        item.done = !checked;
+      }
+
+      return { todos: newTodos };
+    });
+  };
+
+  // filter all todos : all-active-completed
+  filterTodos = (todos) => {
+    let newTodos = [...todos];
+
+    if (this.state.filter === "Active") {
+      newTodos = newTodos.filter((item) => item.done === false);
+      return newTodos;
+    }
+
+    if (this.state.filter === "Completed") {
+      newTodos = newTodos.filter((item) => item.done === true);
+      return newTodos;
+    }
+
+    return newTodos;
+  };
+
+  // edit current todo
+  editTodo = (todoId, text) => {
+    this.setState(({ todos }) => {
+      const newTodos = [...todos];
+
+      const idx = newTodos.findIndex((item) => item.id === todoId);
+
+      if (text) {
+        newTodos[idx].label = text;
+      } else {
+        newTodos.splice(idx, 1);
+      }
+
+      return { todos: newTodos };
+    });
+  };
+
   render() {
     const { todos, filter } = this.state;
 
@@ -91,24 +137,23 @@ export default class App extends Component {
     const countDone = todos.filter((item) => item.done === true).length;
     const countLeft = todos.length - countDone;
 
-    let newTodos = [...todos];
-
-    if (this.state.filter === "All") {
-    } else if (this.state.filter === "Active") {
-      newTodos = newTodos.filter((item) => item.done === false);
-    } else {
-      newTodos = newTodos.filter((item) => item.done === true);
-    }
+    let newTodos = this.filterTodos(todos);
 
     return (
       <section className="todoapp">
         <Header />
-        <Toggle />
+        {hasData && (
+          <Toggle
+            checkAll={this.checkAll}
+            isAllDone={countLeft ? false : true}
+          />
+        )}
         <Add addTodo={this.addTodo} />
         <List
           todos={newTodos}
           onDelete={this.deleteTodo}
           onChange={this.checkTodo}
+          editTodo={this.editTodo}
         />
         {hasData && (
           <Footer
