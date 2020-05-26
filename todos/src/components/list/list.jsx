@@ -3,7 +3,7 @@ import Todo from "../todo";
 
 import "./list.css";
 
-function List({ todos, onDelete, onChange, editTodo }) {
+function List({ todos, onDelete, onChange, onEditTodo }) {
   const elements = todos.map((item) => {
     const { id, label, done } = item;
 
@@ -15,7 +15,7 @@ function List({ todos, onDelete, onChange, editTodo }) {
         done={done}
         onDelete={onDelete}
         onChange={onChange}
-        editTodo={editTodo}
+        editTodo={onEditTodo}
       />
     );
   });

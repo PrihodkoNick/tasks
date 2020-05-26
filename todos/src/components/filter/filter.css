@@ -30,3 +30,12 @@
 .filters li button:hover {
   border-color: rgba(175, 47, 47, 0.1);
 }
+
+@media (max-width: 470px) {
+  .filters {
+    position: relative;
+    order: 3;
+    padding-top: 10px;
+    width: 100%;
+  }
+}

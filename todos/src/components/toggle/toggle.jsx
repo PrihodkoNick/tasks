@@ -3,15 +3,15 @@ import "./toggle.css";
 
 function Toggle({ checkAll, isAllDone }) {
   return (
-    <div className="toggle-all">
+    <label className="toggle-all">
       <input
         type="checkbox"
-        id="check-all"
         className="check-all"
-        checked={isAllDone ? "checked" : ""}
+        onChange={checkAll}
+        checked={isAllDone}
       />
-      <label htmlFor="check-all" onClick={checkAll}></label>
-    </div>
+      <span></span>
+    </label>
   );
 }
 

@@ -23,3 +23,13 @@
 .footer > button:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 470px) {
+  .footer {
+    flex-wrap: wrap;
+  }
+
+  .clear-completed {
+    order: 2;
+  }
+}

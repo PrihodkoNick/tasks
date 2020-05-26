@@ -9,6 +9,7 @@
   border: 0;
   background: rgba(0, 0, 0, 0.003);
   box-shadow: inset 0 -2px 1px rgba(0, 0, 0, 0.03);
+  outline: none;
 }
 
 .new-todo::-webkit-input-placeholder {
@@ -19,4 +20,18 @@
 .new-todo::-moz-placeholder {
   font-style: italic;
   color: #ccc;
+}
+
+@media (max-width: 470px) {
+  .new-todo {
+    font-size: 20px;
+  }
+
+  .new-todo::-webkit-input-placeholder {
+    font-size: 20px;
+  }
+
+  .new-todo::-moz-placeholder {
+    font-size: 20px;
+  }
 }

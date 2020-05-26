@@ -15,7 +15,7 @@ export default class Add extends Component {
 
     if (e.keyCode === 13) {
       this.props.addTodo(this.state.value);
-      this.setState({ value: "" });
+      this.setState({ value: "" }); // clear add field
     }
   };
 

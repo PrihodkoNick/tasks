@@ -1,17 +1,13 @@
 .toggle-all {
   position: absolute;
   top: 20px;
-  left: 25px;
-}
-
-.toggle-all label {
-  position: absolute;
-  top: 0;
-  left: 0;
+  left: 20px;
 
   display: block;
   width: 30px;
   height: 30px;
+
+  cursor: pointer;
 }
 
 /* input invisible */
@@ -21,17 +17,16 @@
   opacity: 0;
 }
 
-.toggle-all label::before {
+.check-all + span::before {
   position: absolute;
   content: "❯";
+
   transform: rotate(90deg);
 
   font-size: 22px;
   color: #e6e6e6;
-
-  cursor: pointer;
 }
 
-.check-all:checked + label::before {
+.check-all:checked + span::before {
   color: #737373;
 }
