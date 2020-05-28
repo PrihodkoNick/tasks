@@ -10,24 +10,24 @@
   height: 25px;
 }
 
-.filters li {
+.filters__item {
   margin-right: 2px;
 }
 
-.filters li:last-child {
+.filters__item:last-child {
   margin-right: 0;
 }
 
-.filters li button {
+.filters__toggle {
   border: 1px solid transparent;
   border-radius: 3px;
 }
 
-.filters li .selected {
+.filters__toggle.selected {
   border-color: rgba(175, 47, 47, 0.2);
 }
 
-.filters li button:hover {
+.filters__toggle:hover {
   border-color: rgba(175, 47, 47, 0.1);
 }
 

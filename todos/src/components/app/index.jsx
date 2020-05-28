@@ -1,21 +1,24 @@
 import React, { Component } from "react";
+
+import { FILTER_TYPES } from "../../constants";
 import "./app.css";
 
-import Header from "../header";
-import Toggle from "../toggle";
-import Add from "../add";
-import List from "../list";
-import Footer from "../footer";
+import memoizeOne from "memoize-one";
+
+import Header from "../Header";
+import Toggle from "../Toggle";
+import Add from "../Add";
+import List from "../List";
+import Footer from "../Footer";
 
 export default class App extends Component {
   todoId = 0;
 
   state = {
     todos: [],
-    filter: "All",
+    filter: FILTER_TYPES.all,
   };
 
-  // check/uncheck all todos
   checkAll = (e) => {
     const checked = e.target.checked;
 
@@ -30,7 +33,6 @@ export default class App extends Component {
     });
   };
 
-  // add new todo
   addTodo = (label) => {
     const newTodo = { label, done: false, id: (this.todoId += 1) };
 
@@ -41,28 +43,27 @@ export default class App extends Component {
     });
   };
 
-  // filter all todos : all-active-completed
+  memoizedList = memoizeOne((list, term) =>
+    list.filter((item) => item.done === term)
+  );
+
   filterTodos = (todos) => {
     let newArray = [...todos];
 
     const { filter } = this.state;
 
-    if (filter !== "All") {
-      const term = filter === "Active" ? false : true;
+    if (filter !== FILTER_TYPES.all) {
+      const term = filter === FILTER_TYPES.active ? false : true;
 
-      newArray = newArray.filter((item) => item.done === term);
+      newArray = this.memoizedList(newArray, term);
+
       return newArray;
     }
 
     return newArray;
   };
 
-  // delete current todo
-  deleteTodo = (e) => {
-    e.preventDefault();
-
-    const todoId = +e.target.closest("li").dataset.id;
-
+  deleteTodo = (todoId) => {
     this.setState(({ todos }) => {
       const newArray = [...todos];
       const idx = newArray.findIndex((item) => item.id === todoId);
@@ -73,7 +74,6 @@ export default class App extends Component {
     });
   };
 
-  // check/uncheck current todo
   checkTodo = (todoId, checked) => {
     this.setState(({ todos }) => {
       const newArray = [...todos];
@@ -86,7 +86,6 @@ export default class App extends Component {
     });
   };
 
-  // edit current todo
   editTodo = (todoId, text) => {
     this.setState(({ todos }) => {
       const newArray = [...todos];
@@ -103,18 +102,18 @@ export default class App extends Component {
     });
   };
 
-  filterChange = (e) => {
-    const filter = e.target.innerText;
+  filterChange = (type) => {
+    const filter = type;
 
     this.setState({ filter });
   };
 
   clearCompleted = () => {
     this.setState(({ todos }) => {
-      let newTodos = [...todos];
-      newTodos = newTodos.filter((item) => item.done === false);
+      let newArray = [...todos];
+      newArray = newArray.filter((item) => item.done === false);
 
-      return { todos: newTodos };
+      return { todos: newArray };
     });
   };
 
@@ -128,13 +127,13 @@ export default class App extends Component {
     const filteredTodos = this.filterTodos(todos);
 
     return (
-      <section className="todoapp">
+      <section className="app">
         <Header />
         {hasData && <Toggle checkAll={this.checkAll} isAllDone={!countLeft} />}
         <Add addTodo={this.addTodo} />
         <List
           todos={filteredTodos}
-          onDelete={this.deleteTodo}
+          deleteTodo={this.deleteTodo}
           onChange={this.checkTodo}
           onEditTodo={this.editTodo}
         />

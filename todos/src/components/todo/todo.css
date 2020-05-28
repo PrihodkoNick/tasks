@@ -1,11 +1,16 @@
-.view {
+.todo {
+  font-size: 24px;
+  border-bottom: 1px solid #ededed;
+}
+
+.todo__view {
   position: relative;
 
   display: flex;
   align-items: center;
 }
 
-.todo-list li label {
+.todo__text {
   flex-grow: 1;
 
   padding: 15px 45px 15px 60px;
@@ -14,15 +19,7 @@
   word-break: break-all;
 }
 
-.todo-list li .delete::after {
-  content: "×";
-}
-
-.todo-list li:hover .delete {
-  display: block;
-}
-
-.delete {
+.todo__delete {
   display: none;
   position: absolute;
   right: 10px;
@@ -37,23 +34,31 @@
   transition: color 0.2s ease-out;
 }
 
-.delete:hover {
+.todo__delete::after {
+  content: "×";
+}
+
+.todo__delete:hover {
   color: #af5b5e;
 }
 
-.done {
+.todo:hover .todo__delete {
+  display: block;
+}
+
+.todo--done {
   text-decoration: line-through;
   color: #999;
 }
 
-.toggle {
+.todo__toggle {
   position: absolute;
   left: 20px;
   width: 1px;
   opacity: 0;
 }
 
-.todo-list .toggle + label {
+.todo__toggle + label {
   position: absolute;
   top: 10px;
   left: 10px;
@@ -64,18 +69,18 @@
   padding: 0;
 }
 
-.todo-list .toggle + label:before {
+.todo__toggle + label:before {
   position: absolute;
-  content: url("./round.svg");
+  content: url("../../assets/round.svg");
 
   cursor: pointer;
 }
 
-.todo-list .toggle:checked + label:before {
-  content: url("./round-check.svg");
+.todo__toggle:checked + label:before {
+  content: url("../../assets/round-check.svg");
 }
 
-.edit-box {
+.todo__edit-box {
   position: absolute;
 
   display: flex;
@@ -84,7 +89,7 @@
   background-color: #f5f5f5;
 }
 
-.edit {
+.todo__edit {
   flex-grow: 1;
 
   height: 100%;

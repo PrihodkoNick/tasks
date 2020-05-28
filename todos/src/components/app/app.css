@@ -1,4 +1,4 @@
-.todoapp {
+.app {
   position: relative;
 
   margin: 130px auto 40px;
@@ -9,7 +9,7 @@
 }
 
 @media (max-width: 470px) {
-  .todoapp {
+  .app {
     margin-bottom: 20px;
   }
 }

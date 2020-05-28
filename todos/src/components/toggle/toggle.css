@@ -1,4 +1,4 @@
-.toggle-all {
+.app__toggle-all {
   position: absolute;
   top: 20px;
   left: 20px;
@@ -11,13 +11,13 @@
 }
 
 /* input invisible */
-.check-all {
+.app__check-all {
   width: 1px;
 
   opacity: 0;
 }
 
-.check-all + span::before {
+.app__check-all + span::before {
   position: absolute;
   content: "❯";
 
@@ -27,6 +27,6 @@
   color: #e6e6e6;
 }
 
-.check-all:checked + span::before {
+.app__check-all:checked + span::before {
   color: #737373;
 }
