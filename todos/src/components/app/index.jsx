@@ -43,25 +43,19 @@ export default class App extends Component {
     });
   };
 
-  memoizedList = memoizeOne((list, term) =>
-    list.filter((item) => item.done === term)
-  );
-
-  filterTodos = (todos) => {
+  filterTodos = memoizeOne((todos, filter) => {
     let newArray = [...todos];
 
-    const { filter } = this.state;
-
     if (filter !== FILTER_TYPES.all) {
-      const term = filter === FILTER_TYPES.active ? false : true;
+      const term = !(filter === FILTER_TYPES.active);
 
-      newArray = this.memoizedList(newArray, term);
+      newArray = newArray.filter((item) => item.done === term);
 
       return newArray;
     }
 
     return newArray;
-  };
+  });
 
   deleteTodo = (todoId) => {
     this.setState(({ todos }) => {
@@ -117,14 +111,18 @@ export default class App extends Component {
     });
   };
 
+  filterDone = memoizeOne((todos) => {
+    return todos.filter((item) => item.done === true);
+  });
+
   render() {
     const { todos, filter } = this.state;
     const hasData = todos.length || false;
 
-    const countDone = todos.filter((item) => item.done === true).length;
+    const countDone = this.filterDone(todos).length;
     const countLeft = todos.length - countDone;
 
-    const filteredTodos = this.filterTodos(todos);
+    const filteredTodos = this.filterTodos(todos, filter);
 
     return (
       <section className="app">
