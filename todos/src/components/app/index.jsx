@@ -1,6 +1,9 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 
-import { FILTER_TYPES } from "../../constants";
+import { FILTER_TYPES } from "../../data/constants";
+import * as actions from "../../data/actions";
+
 import "./app.css";
 
 import memoizeOne from "memoize-one";
@@ -11,80 +14,54 @@ import Add from "../Add";
 import List from "../List";
 import Footer from "../Footer";
 
-export default class App extends Component {
+class App extends Component {
   todoId = 0;
 
   checkAll = (e) => {
-    const checked = e.target.checked;
-
-    this.props.store.dispatch({
-      type: "CHECK_ALL",
-      checked,
-    });
+    this.props.checkAll(e.target.checked);
   };
 
   addTodo = (label) => {
-    this.props.store.dispatch({
-      type: "ADD_TODO",
-      label,
-      done: false,
-      id: (this.todoId += 1),
-    });
+    this.props.addTodo({ label, done: false, id: (this.todoId += 1) });
+  };
+
+  deleteTodo = (id) => {
+    this.props.deleteTodo(id);
+  };
+
+  checkTodo = (id, checked) => {
+    this.props.checkTodo({ id, checked });
+  };
+
+  editTodo = (id, text) => {
+    this.props.editTodo({ todoId: id, text });
+  };
+
+  filterChange = (filter) => {
+    this.props.filterChange(filter);
+  };
+
+  clearCompleted = () => {
+    this.props.clearCompleted();
   };
 
   filterTodos = memoizeOne((todos, filter) => {
     let newArray = [...todos];
-
     if (filter !== FILTER_TYPES.all) {
       const term = !(filter === FILTER_TYPES.active);
-
       newArray = newArray.filter((item) => item.done === term);
-
       return newArray;
     }
 
     return newArray;
   });
 
-  deleteTodo = (id) => {
-    this.props.store.dispatch({
-      type: "DELETE_TODO",
-      id,
-    });
-  };
-
-  checkTodo = (id, checked) => {
-    this.props.store.dispatch({
-      type: "CHECK_TODO",
-      id,
-      checked,
-    });
-  };
-
-  editTodo = (id, text) => {
-    this.props.store.dispatch({
-      type: "EDIT_TODO",
-      id,
-      text,
-    });
-  };
-
-  filterChange = (filter) => {
-    this.props.store.dispatch({ type: "CHANGE_FILTER", filter });
-  };
-
-  clearCompleted = () => {
-    this.props.store.dispatch({
-      type: "CLEAR_COMPLETED",
-    });
-  };
-
   filterDone = memoizeOne((todos) => {
     return todos.filter((item) => item.done === true);
   });
 
   render() {
-    const { todos, filter } = this.props.store.getState();
+    const { todos, filter } = this.props.state;
 
     const hasData = todos.length || false;
 
@@ -119,3 +96,21 @@ export default class App extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return { state };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    checkAll: (payload) => dispatch(actions.checkAll(payload)),
+    addTodo: (payload) => dispatch(actions.addTodo(payload)),
+    deleteTodo: (payload) => dispatch(actions.deleteTodo(payload)),
+    checkTodo: (payload) => dispatch(actions.checkTodo(payload)),
+    editTodo: (payload) => dispatch(actions.editTodo(payload)),
+    filterChange: (payload) => dispatch(actions.changeFilter(payload)),
+    clearCompleted: () => dispatch(actions.clearCompleted()),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

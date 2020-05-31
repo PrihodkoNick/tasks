@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { FILTER_TYPES } from "../../constants";
+import { FILTER_TYPES } from "../../data/constants";
 import "./filter.css";
 
 let classNames = require("classnames");

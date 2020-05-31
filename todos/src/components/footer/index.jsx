@@ -2,7 +2,7 @@ import React from "react";
 import Filter from "../Filter";
 import PropTypes from "prop-types";
 
-import { FILTER_TYPES } from "../../constants";
+import { FILTER_TYPES } from "../../data/constants";
 import "./footer.css";
 
 function Footer({ left, done, onFilterChange, activeFilter, clearCompleted }) {
