@@ -14,32 +14,21 @@ import Footer from "../Footer";
 export default class App extends Component {
   todoId = 0;
 
-  state = {
-    todos: [],
-    filter: FILTER_TYPES.all,
-  };
-
   checkAll = (e) => {
     const checked = e.target.checked;
 
-    this.setState(({ todos }) => {
-      let newArray = [...todos];
-
-      for (let item of newArray) {
-        item.done = checked;
-      }
-
-      return { todos: newArray };
+    this.props.store.dispatch({
+      type: "CHECK_ALL",
+      checked,
     });
   };
 
   addTodo = (label) => {
-    const newTodo = { label, done: false, id: (this.todoId += 1) };
-
-    this.setState(({ todos }) => {
-      const newArray = [...todos, newTodo];
-
-      return { todos: newArray };
+    this.props.store.dispatch({
+      type: "ADD_TODO",
+      label,
+      done: false,
+      id: (this.todoId += 1),
     });
   };
 
@@ -57,57 +46,36 @@ export default class App extends Component {
     return newArray;
   });
 
-  deleteTodo = (todoId) => {
-    this.setState(({ todos }) => {
-      const newArray = [...todos];
-      const idx = newArray.findIndex((item) => item.id === todoId);
-
-      newArray.splice(idx, 1);
-
-      return { todos: newArray };
+  deleteTodo = (id) => {
+    this.props.store.dispatch({
+      type: "DELETE_TODO",
+      id,
     });
   };
 
-  checkTodo = (todoId, checked) => {
-    this.setState(({ todos }) => {
-      const newArray = [...todos];
-
-      const idx = newArray.findIndex((item) => item.id === todoId);
-
-      newArray[idx].done = checked;
-
-      return { todos: newArray };
+  checkTodo = (id, checked) => {
+    this.props.store.dispatch({
+      type: "CHECK_TODO",
+      id,
+      checked,
     });
   };
 
-  editTodo = (todoId, text) => {
-    this.setState(({ todos }) => {
-      const newArray = [...todos];
-
-      const idx = newArray.findIndex((item) => item.id === todoId);
-
-      if (text) {
-        newArray[idx].label = text;
-      } else {
-        newArray.splice(idx, 1); // if text is empty then delete current todo
-      }
-
-      return { todos: newArray };
+  editTodo = (id, text) => {
+    this.props.store.dispatch({
+      type: "EDIT_TODO",
+      id,
+      text,
     });
   };
 
-  filterChange = (type) => {
-    const filter = type;
-
-    this.setState({ filter });
+  filterChange = (filter) => {
+    this.props.store.dispatch({ type: "CHANGE_FILTER", filter });
   };
 
   clearCompleted = () => {
-    this.setState(({ todos }) => {
-      let newArray = [...todos];
-      newArray = newArray.filter((item) => item.done === false);
-
-      return { todos: newArray };
+    this.props.store.dispatch({
+      type: "CLEAR_COMPLETED",
     });
   };
 
@@ -116,7 +84,8 @@ export default class App extends Component {
   });
 
   render() {
-    const { todos, filter } = this.state;
+    const { todos, filter } = this.props.store.getState();
+
     const hasData = todos.length || false;
 
     const countDone = this.filterDone(todos).length;
@@ -128,7 +97,9 @@ export default class App extends Component {
       <section className="app">
         <Header />
         {hasData && <Toggle checkAll={this.checkAll} isAllDone={!countLeft} />}
+
         <Add addTodo={this.addTodo} />
+
         <List
           todos={filteredTodos}
           deleteTodo={this.deleteTodo}

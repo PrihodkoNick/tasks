@@ -2,9 +2,16 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./components/App";
+import { createStore } from "redux";
 
-ReactDOM.render(
-  <App />,
+import rootReducer from "./reducers";
 
-  document.getElementById("root")
-);
+const store = createStore(rootReducer);
+
+const update = () => {
+  ReactDOM.render(<App store={store} />, document.getElementById("root"));
+};
+
+update();
+
+store.subscribe(update);
