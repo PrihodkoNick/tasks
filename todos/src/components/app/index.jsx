@@ -108,7 +108,7 @@ class App extends Component {
 
 const mapStateToProps = (state) => ({
   todos: state.todos.todos,
-  filter: state.filter,
+  filter: state.filter.filter,
 });
 
 const mapDispatchToProps = {
