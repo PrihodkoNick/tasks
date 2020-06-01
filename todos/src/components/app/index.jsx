@@ -40,7 +40,7 @@ class App extends Component {
   };
 
   filterChange = (filter) => {
-    this.props.filterChange(filter);
+    this.props.changeFilter(filter);
   };
 
   clearCompleted = () => {
@@ -111,14 +111,14 @@ const mapStateToProps = (state) => ({
   filter: state.filter.filter,
 });
 
-const mapDispatchToProps = {
-  checkAll: actions.checkAll,
-  addTodo: actions.addTodo,
-  deleteTodo: actions.deleteTodo,
-  checkTodo: actions.checkTodo,
-  editTodo: actions.editTodo,
-  filterChange: actions.changeFilter,
-  clearCompleted: actions.clearCompleted,
-};
+// const mapDispatchToProps = {
+//   checkAll: actions.checkAll,
+//   addTodo: actions.addTodo,
+//   deleteTodo: actions.deleteTodo,
+//   checkTodo: actions.checkTodo,
+//   editTodo: actions.editTodo,
+//   changeFilter: actions.changeFilter,
+//   clearCompleted: actions.clearCompleted,
+// };
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(mapStateToProps, actions)(App);
