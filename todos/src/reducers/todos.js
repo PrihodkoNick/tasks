@@ -1,48 +1,57 @@
 import { ACTION_TYPES } from "../data/types";
 
-const todos = (state = [], action) => {
-  let newArray = [];
-  let idx = 0;
+let initialState = {
+  todos: [],
+};
 
+const todos = (state = initialState, action) => {
   switch (action.type) {
-    case ACTION_TYPES.addTodo:
-      return [...state, action.payload];
+    case ACTION_TYPES.addTodo: {
+      return { ...state, todos: [...state.todos, action.payload] };
+    }
 
-    case ACTION_TYPES.checkAll:
-      newArray = [...state];
-      for (let item of newArray) {
-        item.done = action.payload;
-      }
-      return newArray;
+    case ACTION_TYPES.checkAll: {
+      return {
+        ...state,
+        todos: state.todos.map((item) => {
+          item.done = action.payload;
+          return item;
+        }),
+      };
+    }
 
-    case ACTION_TYPES.deleteTodo:
-      newArray = [...state];
-      idx = newArray.findIndex((item) => item.id === action.payload);
-      newArray.splice(idx, 1);
-      return newArray;
+    case ACTION_TYPES.deleteTodo: {
+      const newTodos = [...state.todos];
+      const idx = newTodos.findIndex((item) => item.id === action.payload);
+      newTodos.splice(idx, 1);
+      return { ...state, todos: newTodos };
+    }
 
-    case ACTION_TYPES.checkTodo:
+    case ACTION_TYPES.checkTodo: {
       const { id, checked } = action.payload;
-      newArray = [...state];
-      idx = newArray.findIndex((item) => item.id === id);
-      newArray[idx].done = checked;
-      return newArray;
+      const newTodos = [...state.todos];
+      const idx = newTodos.findIndex((item) => item.id === id);
+      newTodos[idx].done = checked;
+      return { ...state, todos: newTodos };
+    }
 
-    case ACTION_TYPES.editTodo:
+    case ACTION_TYPES.editTodo: {
       const { todoId, text } = action.payload;
-      newArray = [...state];
-      idx = newArray.findIndex((item) => item.id === todoId);
+      const newTodos = [...state.todos];
+      const idx = newTodos.findIndex((item) => item.id === todoId);
       if (text) {
-        newArray[idx].label = text;
+        newTodos[idx].label = text;
       } else {
-        newArray.splice(idx, 1); // if text is empty then delete current todo
+        newTodos.splice(idx, 1); // if text is empty then delete current todo
       }
-      return newArray;
+      return { ...state, todos: newTodos };
+    }
 
-    case ACTION_TYPES.clearCompleted:
-      newArray = [...state];
-      newArray = newArray.filter((item) => item.done === false);
-      return newArray;
+    case ACTION_TYPES.clearCompleted: {
+      let newTodos = [...state.todos];
+      newTodos = newTodos.filter((item) => item.done === false);
+      return { ...state, todos: newTodos };
+    }
 
     default:
       return state;

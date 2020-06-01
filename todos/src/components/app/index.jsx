@@ -7,6 +7,7 @@ import * as actions from "../../data/actions";
 import "./app.css";
 
 import memoizeOne from "memoize-one";
+import { createSelector } from "reselect";
 
 import Header from "../Header";
 import Toggle from "../Toggle";
@@ -22,7 +23,8 @@ class App extends Component {
   };
 
   addTodo = (label) => {
-    this.props.addTodo({ label, done: false, id: (this.todoId += 1) });
+    const payload = { label, done: false, id: (this.todoId += 1) };
+    this.props.addTodo(payload);
   };
 
   deleteTodo = (id) => {
@@ -46,26 +48,33 @@ class App extends Component {
   };
 
   filterTodos = memoizeOne((todos, filter) => {
-    let newArray = [...todos];
+    let newTodos = [...todos];
     if (filter !== FILTER_TYPES.all) {
       const term = !(filter === FILTER_TYPES.active);
-      newArray = newArray.filter((item) => item.done === term);
-      return newArray;
+      newTodos = newTodos.filter((item) => item.done === term);
+      return newTodos;
     }
 
-    return newArray;
+    return newTodos;
   });
 
   filterDone = memoizeOne((todos) => {
     return todos.filter((item) => item.done === true);
   });
 
+  filterDoneSelector = createSelector(
+    (todos) => todos,
+    (todos) => {
+      return todos.filter((item) => item.done === true);
+    }
+  );
+
   render() {
-    const { todos, filter } = this.props.state;
+    const { todos, filter } = this.props;
 
     const hasData = todos.length || false;
 
-    const countDone = this.filterDone(todos).length;
+    const countDone = this.filterDoneSelector(todos).length;
     const countLeft = todos.length - countDone;
 
     const filteredTodos = this.filterTodos(todos, filter);
@@ -97,20 +106,19 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return { state };
-};
+const mapStateToProps = (state) => ({
+  todos: state.todos.todos,
+  filter: state.filter,
+});
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    checkAll: (payload) => dispatch(actions.checkAll(payload)),
-    addTodo: (payload) => dispatch(actions.addTodo(payload)),
-    deleteTodo: (payload) => dispatch(actions.deleteTodo(payload)),
-    checkTodo: (payload) => dispatch(actions.checkTodo(payload)),
-    editTodo: (payload) => dispatch(actions.editTodo(payload)),
-    filterChange: (payload) => dispatch(actions.changeFilter(payload)),
-    clearCompleted: () => dispatch(actions.clearCompleted()),
-  };
+const mapDispatchToProps = {
+  checkAll: actions.checkAll,
+  addTodo: actions.addTodo,
+  deleteTodo: actions.deleteTodo,
+  checkTodo: actions.checkTodo,
+  editTodo: actions.editTodo,
+  filterChange: actions.changeFilter,
+  clearCompleted: actions.clearCompleted,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
