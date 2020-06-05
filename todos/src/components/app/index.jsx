@@ -15,6 +15,10 @@ import Add from "../Add";
 import List from "../List";
 import Footer from "../Footer";
 
+import TodosService from "../../api";
+
+const { getTodos, addTodos } = new TodosService();
+
 class App extends Component {
   todoId = 0;
 
@@ -24,6 +28,9 @@ class App extends Component {
 
   addTodo = (label) => {
     const payload = { label, done: false, id: (this.todoId += 1) };
+
+    addTodos(payload); // add to database
+
     this.props.addTodo(payload);
   };
 
@@ -68,6 +75,17 @@ class App extends Component {
       return todos.filter((item) => item.done === true);
     }
   );
+
+  componentDidMount() {
+    const allTodos = getTodos();
+
+    allTodos.then((data) => {
+      for (let item of data) {
+        this.todoId = item.todo.id + 1;
+        this.props.addTodo(item.todo);
+      }
+    });
+  }
 
   render() {
     const { todos, filter } = this.props;

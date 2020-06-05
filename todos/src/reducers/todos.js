@@ -7,7 +7,6 @@ let initialState = {
 const todos = (state = initialState, action) => {
   switch (action.type) {
     case ACTION_TYPES.addTodo: {
-      console.log({ ...state });
       return { ...state, todos: [...state.todos, action.payload] };
     }
 
